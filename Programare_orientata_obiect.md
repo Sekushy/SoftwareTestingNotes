@@ -146,5 +146,202 @@ Există **patru** tipuri de modificatori de acces Java:
 
 ---
 
+### Crearea instanțelor unei clase
 
+Pentru a crea o instanță a unei clase, trebuie să:
 
+* **Declarați** o instanță (nume de instanță) al unei anumite clase.
+* **Construiți** instanța (adică, alocați spațiu de stocare pentru instanță și inițializați instanța) folosind operatorul ``new`` .
+
+De exemplu, să presupunem că avem o clasa numită ``Author`` , putem crea instanțe de ``Author`` după cum urmează:
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Declaram 3 instante ale clasei Author
+        Author authorOne, authorTwo, authorThree; // Aceste obiecte retin o valoare numita null
+        
+        // Construim instante folosind operatorul new
+        authorOne = new Author();
+        authorTwo = new Author();
+        authorThree = new Author();
+        
+        // Puteti declara si construi o instanta simultan
+        Author authorFour = new Author();
+    }
+}
+
+```
+
+---
+
+### Operatorul ``.``
+
+Variabilele și metodele aparținând unei clase sunt denumite formal variabile membre și metode membre. Pentru a face referire la o variabilă sau o metodă membru, trebuie să:
+
+* Mai întâi identificați instanța care vă interesează și apoi,
+* Utilizați operatorul punct (`` .`` ) pentru a face referire la variabila sau metoda membru dorită.
+
+De exemplu, să presupunem că avem o clasă numită ``Author`` , cu mai multe variabile membre ( ``fullName,`` ``birthDate ``, etc.) și mai multe metode membre ( ``setNumberOfWrittenBooks()`` , ``getWrittenBooks()`` ). Am creat trei instanțe ale clasei ``Author`` , și anume, ``authorOne`` , ``authorTwo`` și ``authorThree`` . Pentru a invoca metoda ``getWrittenBooks()`` trebuie mai întâi să identificați instanța de interes, să spunem ``secondAuthor`` , apoi să utilizați operatorul punct, sub forma ``secondAuthor.getWrittenBooks() ``.
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Declaram doua instante ale clasei autor folosind constructorul
+        Author firstAuthor = new Author();
+        Author secondAuthor = new Author();
+        
+        // Invocam una din metodele clasei
+        System.out.println(firstAuthor.getNumberOfWrittenBooks());
+        System.out.println(secondAuthor.getWrittenBooks());
+    }
+}
+
+```
+
+---
+
+### Constructor
+
+Un **constructor** este o **<u>metodă specială care are același nume de metodă ca și numele clasei</u>**. Adică, constructorul clasei`` Author`` se numește ``Author`` . În clasa ``Author`` de mai jos, vom defini trei versiuni supraîncărcate ale constructorului ``Author(...)`` . Un constructor este folosit pentru a construi și inițializa variabilele membre. Pentru a construi o nouă instanță a unei clase, trebuie să utilizați operatorul special new urmat de un apel către unul dintre constructori. De exemplu:
+
+```java
+public class Author {
+    private String fullName;
+    private String birthYear;
+    private int numberOfWrittenBooks;
+    private ArrayList<String> genres;
+    private ArrayList<Book> writtenBooks;
+    
+    // Primul constructor
+    public Author() { }
+    
+    // Al doilea constructor
+    public Author(String fullName, String birthYear) {
+        this.fullName = fullName;
+        this.birthYear = birthYear;
+    }
+    
+    // Al treilea constructor
+    public Author(String fullName, String birthYear, int numberOfWrittenBooks) {
+        this.fullName = fullName;
+        this.birthYear = birthYear;
+        this.numberOfWrittenBooks = numberOfWrittenBooks;
+    }
+    
+    public int getNumberOfWrittenBooks() {
+    	return numberOfWrittenBooks;
+    }
+    
+    public void setNumberOfWrittenBooks(int numberOfWrittenBooks) {
+    	this.numberOfWrittenBooks = numberOfWrittenBooks;
+    }
+    
+    public ArrayList<String> getGenres() {
+    	return genres;
+    }
+    
+    public void setGenres(ArrayList<String> genres) {
+    	this.genres = genres;
+    }
+    
+    public ArrayList<Book> getWrittenBooks() {
+    	return writtenBooks;
+    }
+    
+    public void setWrittenBooks(ArrayList<Book> writtenBooks) {
+    	this.writtenBooks = writtenBooks;
+    }
+}
+
+```
+
+Acum vom folosi fiecare constructor pentru instanțierea a trei obiecte de tip ``Author``
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Declaram doua instante ale clasei autor folosind constructorul
+        Author firstAuthor = new Author();
+        Author secondAuthor = new Author("Haruki Murakami", "1949");
+        Author thirdAuthor = new Author("Mary Shelley", "1797", 32);
+    }
+}
+```
+
+O metodă de constructor este diferită de o metodă obișnuită în următoarele aspecte:
+
+* Numele metodei constructorului trebuie să fie același cu numele clasei. După convenția numelui clasei, începe cu litere mari (în loc de litere mici pentru metodele obișnuite)
+* Constructorul nu are niciun tip de returnare în antetul metodei sale. Se întoarce implicit gol. Nicio instrucțiune return nu este permisă în corpul constructorului
+* Constructorul poate fi invocat numai prin operatorul ``new`` . Poate fi folosit o singură dată pentru a inițializa instanța construită. Odată ce o instanță este construită, nu mai puteți apela constructorul
+* Constructorii nu sunt moșteniți (vor fi explicați mai târziu). Fiecare clasă își va defini propriii constructori
+
+**Constructor implicit (default):** Un constructor fără parametru este numit constructor implicit. Inițializează variabilele membre la valorile lor implicite. De exemplu, ``Author()`` din exemplul de mai sus inițializează raza și culoarea variabilelor membre la valorile implicite.
+
+---
+
+### Cuvântul cheie ``this``
+
+Puteți folosi cuvântul cheie ``this`` pentru a face referire la **această** instanță în cadrul unei definiții de clasă. Una dintre principalele utilizări ale cuvântului cheie este pentru a rezolva ambiguitatea.
+
+```java
+public class Author {
+    private String fullName; // membru al clasei numit "fullName"
+        public Author(String fullName) { // parametru in constructor numit la fel "fullName"
+        this.fullName = fullName;
+        // "fullName = fullName" nu are avea sens
+        // "this.fullName" se refera la ACEST membru al clasei
+        // "fullName" acum se intelege ca este parametrul metodei
+    }
+}
+
+```
+
+În codul de mai sus, există doi identificatori numiți ``fullName`` - o variabilă membru a clasei și parametrul metodei. Acest lucru provoacă conflict de denumire. Pentru a evita conflictul de denumire, puteți numi argumentul metodei name în loc de ``fullName`` . Cu toate acestea, ``fullName`` este mai semnificativă în acest context. Java furnizează un cuvânt cheie numit this pentru a rezolva acest conflict de denumire. ``this.fullName`` se referă la variabila membru; în timp ce ``fullName`` se rezolvă la argumentul metodei.
+
+Mai multe despre ``this``
+
+* ``this.varName`` se referă la ``varName`` al acestei instanțe; ``this.methodName(...)`` apelează ``methodName(...)`` a acestei instanțe.
+* Într-un constructor, putem folosi ``this(...)`` pentru a apela un alt constructor al acestei clase.
+* În interiorul unei metode, putem folosi instrucțiunea ``return this`` pentru a returna această instanță apelantului.
+
+---
+
+### Overloading
+
+Supraîncărcarea metodei înseamnă că același nume de metodă poate avea implementări (versiuni) diferite. Totuși, diferitele implementări trebuie să fie distinse prin lista lor de parametri (fie numărul de parametri, fie tipul de parametri, fie ordinea acestora).
+
+```java
+public class Author {
+    private String fullName;
+    private String birthYear;
+    private int numberOfWrittenBooks;
+    // Primul constructor
+    public Author() { }
+    
+    // Al doilea constructor
+    public Author(String fullName, String birthYear) {
+        this.fullName = fullName;
+        this.birthYear = birthYear;
+    }
+    
+    // Al treilea constructor
+    public Author(String fullName, String birthYear, int numberOfWrittenBooks) {
+        this.fullName = fullName;
+        this.birthYear = birthYear;
+        this.numberOfWrittenBooks = numberOfWrittenBooks;
+    }
+}
+```
+
+---
+
+### Encapsulation
+
+O clasă încapsulează numele, atributele statice și comportamentele dinamice într-o „cutie cu 3 compartimente”. Odată ce o clasă este definită, puteți sigila „cutia” și puneți „cutia” pe raft pentru ca alții să o utilizeze și să o refolosească. Oricine poate ridica „cutia” și o poate folosi în aplicația sa. Acest lucru nu se poate face în limbajele procedurale, cum ar fi C, deoarece atributele (sau variabilele) statice sunt împrăștiate pe întregul program și fișierele antet. Nu puteți „decupa” o porțiune din programul C, conectați-vă la un alt program și așteptați ca programul să ruleze fără modificări ample.
+
+Variabilele membre ale unei clase sunt de obicei ascunse de cuvântul exterior (adică, celelalte clase), cu modificatorul de control al accesului privat. Accesul la variabilele membrilor este asigurat prin metode de evaluator public, e.g ``getNumberOfWrittenBooks()`` sau ``getWrittenBooks()``
+
+Aceasta urmează principiul **<u>ascunderii informațiilor</u>**. Adică, obiectele comunică între ele folosind interfețe bine definite (metode publice). Obiectele nu au voie să cunoască detaliile de implementare ale altora. Detaliile implementării sunt ascunse sau **încapsulate** în clasă. Ascunderea informațiilor facilitează reutilizarea clasei.
+
+**Regula generală:** nu faceți publice nicio variabilă, decât dacă aveți un motiv întemeiat.
