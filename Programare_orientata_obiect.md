@@ -708,3 +708,138 @@ public class Main {
 ```
 
 **Regula generală:** Folosiți compoziția dacă este posibil, înainte de a lua în considerare moștenirea. Folosiți moștenirea numai dacă există o relație ierarhică clară între clase.
+
+### Polymorphism
+
+Cuvântul „polimorfism” înseamnă „*multe forme*”. Provine din cuvântul grecesc „poli” (mulți) și „morphos” (formă). De exemplu, în chimie, carbonul prezintă polimorfism deoarece poate fi găsit sub mai multe forme: grafit și diamant. Dar, fiecare formular are propriile proprietăți distincte.
+
+Polimorfismul este foarte puternic în OOP pentru a separa interfața și implementarea, astfel încât să permită programatorului să programeze la interfață în proiectarea unui sistem complex.
+
+Luați în considerare următorul exemplu. Să presupunem că programul nostru folosește multe tipuri de forme, cum ar fi triunghi, dreptunghi și așa mai departe. Ar trebui să proiectăm o superclasă numită ``Shape``, care definește interfețele publice (sau comportamentele) tuturor formelor. De exemplu, am dori ca toate formele să aibă o metodă numită ``getArea()``, care returnează aria acelei forme particulare. Clasa ``Shape`` poate fi scrisă după cum urmează.
+
+````mermaid
+classDiagram
+	class Shape {
+		Shape: String colour
+		Shape: getArea() double
+		Shape: toString() String
+	}
+	
+	class Rectangle {
+		Rectangle: int length
+		Rectangle: int width
+		Rectangle: getArea() double
+		Rectangle: toString() String
+	}
+	
+	class Triangle {
+		Triangle: int base
+		Triangle:  int height
+		Triangle: getArea() double
+		Triangle: toString() String
+	}
+	
+	Shape <|-- Rectangle
+	Shape <|-- Triangle
+````
+
+```java
+public class Shape {
+   // Variabile private
+   private String color;
+   
+   /** Construim o forma folosind culoarea care ne este data ca si parametru in constructor */
+   public Shape (String color) {
+      this.color = color;
+   }
+
+   /** Returnam o scurta descriere */   
+   @Override
+   public String toString() {
+      return "Shape[color=" + color + "]";
+   }
+   
+   /** Toate formele trebuie sa vina cu o implementare pentru metoda de getArea() */
+   public double getArea() {
+      // Deoarece metoda ne obliga sa returnam ceva, vom afisa doar un mesaj de eroare si vom returna 0.
+      System.err.println("Shape unknown! Cannot compute area!");
+      return 0;
+   }
+}
+```
+
+Rețineți că avem o problemă la scrierea metodei ``getArea()`` în clasa ``Shape``, deoarece aria nu poate fi calculată decât dacă forma reală este cunoscută. Vom printa un mesaj de eroare pentru moment. În secțiunea ulterioară, vă voi arăta cum să rezolvați această problemă.
+
+```java
+public class Rectangle extends Shape {
+   // Variabile private
+   private int length, width;
+   
+   /** Construim un dreptunghi folosind culoarea, lungimea si latimea care ne este data ca si parametru in constructor */
+   public Rectangle(String color, int length, int width) {
+      super(color);
+      this.length = length;
+      this.width = width;
+   }
+
+   /** Returnam o scurta descriere */    
+   @Override
+   public String toString() {
+      return "Rectangle[length=" + length + ",width=" + width + "," + super.toString() + "]";
+   }
+   
+   /** Suprascriem metoda mostenita de getArea() ca sa venim cu implementarea adecvata unui dreptunghi */
+   @Override
+   public double getArea() {
+      return length * width;
+   }
+}
+```
+
+```java
+public class Triangle extends Shape {
+   // Variabile private
+   private int base, height;
+   
+    /** Construim un dreptunghi folosind culoarea, baza si inaltimea care ne este data ca si parametru in constructor */
+   public Triangle(String color, int base, int height) {
+      super(color);
+      this.base = base;
+      this.height = height;
+   }
+   
+   /** Returnam o scurta descriere */   
+   @Override
+   public String toString() {
+      return "Triangle[base=" + base + ",height=" + height + "," + super.toString() + "]";
+   }
+   
+   /** Suprascriem metoda mostenita de getArea() ca sa venim cu implementarea adecvata unui triunghi */
+   @Override
+   public double getArea() {
+      return 0.5 * base * height;
+   }
+}
+```
+
+Subclasele suprascrie metoda ``getArea()`` moștenită de la superclasă și oferă implementările adecvate pentru ``getArea()``.
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Rectangle rectangle = new Rectangle("Red", 4, 5);
+        System.out.println(rectangle);
+        //Rectangle[length=4,width=5,Shape[color=red]]
+        System.out.println("Area is " + rectangle.getArea());  // Apelam getArea() al dreptunghiului
+        //Aria este 20.0
+
+        Triangle triangle = new Triangle("blue", 4, 5);
+        System.out.println(triangle);
+        //Triangle[base=4,height=5,Shape[color=blue]]
+        System.out.println("Area is " + triangle.getArea());  // Apelam getArea() al triunghiului
+        //Aria este 10.0
+    }
+}
+```
+
+Frumusețea acestui cod este că toate referințele sunt din superclasă (adică, programarea la nivel de interfață). Puteți instanția o altă instanță de subclasă, iar codul încă funcționează. Vă puteți extinde cu ușurință programul adăugând mai multe subclase, cum ar fi ``Circle``, ``Square`` etc., cu ușurință.
