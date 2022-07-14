@@ -309,7 +309,7 @@ Mai multe despre ``this``
 
 ### Overloading
 
-Supraîncărcarea metodei înseamnă că același nume de metodă poate avea implementări (versiuni) diferite. Totuși, diferitele implementări trebuie să fie distinse prin lista lor de parametri (fie numărul de parametri, fie tipul de parametri, fie ordinea acestora).
+**Supraîncărcarea** metodei înseamnă că același nume de metodă poate avea implementări (versiuni) diferite. Totuși, diferitele implementări trebuie să fie distinse prin lista lor de parametri (fie numărul de parametri, fie tipul de parametri, fie ordinea acestora).
 
 ```java
 public class Author {
@@ -345,3 +345,366 @@ Variabilele membre ale unei clase sunt de obicei ascunse de cuvântul exterior (
 Aceasta urmează principiul **<u>ascunderii informațiilor</u>**. Adică, obiectele comunică între ele folosind interfețe bine definite (metode publice). Obiectele nu au voie să cunoască detaliile de implementare ale altora. Detaliile implementării sunt ascunse sau **încapsulate** în clasă. Ascunderea informațiilor facilitează reutilizarea clasei.
 
 **Regula generală:** nu faceți publice nicio variabilă, decât dacă aveți un motiv întemeiat.
+
+---
+
+### Composition & Inheritance
+
+Există două moduri de a reutiliza clasele existente, și anume, **compoziția** și **moștenirea**. Prin compoziție, definiți o nouă clasă, care este <u>compusă</u> din <u>clase existente</u>. Prin <u>moștenire</u>, obțineți <u>o nouă clasă bazată pe o clasă existentă</u>, cu modificări sau extensii.
+
+Vom începe cu reutilizarea claselor prin compoziție - prin exemple.
+
+```mermaid
+classDiagram
+	class Author {
+		Author: String name
+		Author: String email
+		Author: char email
+		Author: Author(email, name, gender)
+		Author: getName()
+		Author: getEmail()
+		Author: getGender()
+		Author: setEmail()
+	}
+```
+
+O clasă numită ``Author`` este proiectată așa cum se arată în diagrama de clasă. Contine:
+
+* Trei variabile private: ``name ``(String), ``email`` (String) și ``gender``(„m” sau „f”)
+* Un **constructor** pentru a inițializa numele, e-mailul și sexul cu valorile date.
+  (Nu există un constructor implicit, deoarece nu există o valoare implicită pentru nume, e-mail și sex.)
+* Getters/setters publici: ``getName()``, ``getEmail()``, ``setEmail()`` și ``getGender()``.
+  (Nu există setari pentru nume și sex, deoarece aceste proprietăți nu sunt concepute pentru a fi modificate.)
+
+```java
+public class Author {
+   // Variabilele private
+   private String name;
+   private String email;
+   private char gender;   // 'm' sau 'f'
+ 
+   /** Constructorul pentur instantele de Author care vor lua 3 parametrii */
+   public Author(String name, String email, char gender) {
+      this.name = name;
+      this.email = email;
+      this.gender = gender;
+   }
+ 
+   // Getter si setter publici folositi pentru a modifica si accesa valorile instantei.
+   // Nu avem setter pentru nume si gen doarece prin design, nu vom modifica aceste valori.
+   /** Returneaza un string ca nume */
+   public String getName() {
+      return name;
+   }
+   /** Returneaza un caracter ca gen */
+   public char getGender() {
+      return gender;
+   }
+   /** Returneaza emailul ca string */
+   public String getEmail() {
+      return email;
+   }
+   /** Seteaza valoarea emailului */
+   public void setEmail(String email) {
+      this.email = email;
+   }
+    
+    @Override
+    public String toString() {
+        return name + ", " + email + ", " + gender;
+    }
+}
+```
+
+Să proiectăm o clasă de carte. Să presupunem că o carte este scrisă de un (și exact unul) autor. 
+
+```mermaid
+classDiagram
+    class Book {
+        Book: String name
+        Book: Author author
+        Book: double price
+        Book: int quantity
+        Book: Book(name, author, price, quantity)
+        Book: getName()
+        Book: getAuthor()
+        Book: getPrice()
+        Book: setPrice()
+        Book: setQuantity()
+        Book: getQuantity()
+    }
+```
+
+
+
+Clasa ``Book`` (așa cum se arată în diagrama de clasă) conține următorii membri:
+
+* Patru variabile membre private: ``name ``(``String``), ``author`` (o instanță a clasei ``Author`` pe care tocmai am creat-o, presupunând că fiecare carte are exact un autor), ``price`` (``double``) și ``quantity``(``int``).
+* Getterii și setarii publici: ``getName()``,`` getAuthor()``, ``getPrice()``, ``setPrice()``, ``getQty()``, ``setQty()``.
+
+```java
+public class Book {
+   // Variabile private
+   private String name;
+   private Author author;
+   private double price;
+   private int qty;
+ 
+   /** Constructorul folosit pentru a genera o instanta de tip Book care primeste ca si parametru un obiect de tip Author*/
+   public Book(String name, Author author, double price, int qty) {
+      this.name = name;
+      this.author = author;
+      this.price = price;
+      this.qty = qty;
+   }
+ 
+   // Getters and Setters
+   /** Returneaza numele cartii */
+   public String getName() {
+      return name;
+   }
+   /** Returneaza o instanta a clasei author */
+   public Author getAuthor() {
+      return author;  // returneaza obiectul membru author care este o instanta a clasei Author
+   }
+   /** Returneaza pretul */
+   public double getPrice() {
+      return price;
+   }
+   /** Seteaza o valoare pentru pret */
+   public void setPrice(double price) {
+      this.price = price;
+   }
+   /** Returneaza cantitatea */
+   public int getQty() {
+      return qty;
+   }
+   /** Seteaza cantitatea */
+   public void setQty(int qty) {
+      this.qty = qty;
+   }
+  
+   @Override
+   public String toString() {
+      return "Book{" +
+                "name='" + name + '\'' +
+                ", author=" + author +
+                ", price=" + price +
+                ", qty=" + qty +
+                '}';
+    }
+}
+```
+
+Exemplu pentru clasa ``Main.java``
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Mai intai avem nevoie de un autor pentru a creea o instanta de 'Book'
+        Author firstAuthor = new Author("Haruki Murakami", "haruki.murakami@gmail.com", 'm');
+        System.out.println(firstAuthor);  // Prin printarea obiectului, apelam automat metoda de toString()
+        // Output: Haruki Murakami, haruki.murakami@gmail.com, m
+
+        // Acum putem creea o instanta a clasei 'Book'
+        Book firstBook = new Book("Kafka on the shore", firstAuthor, 29.99, 100);
+        System.out.println(firstBook);  // Prin printarea obiectului, apelam automat metoda de toString()
+        // Kafka on the shore de Haruki Murakami, haruki.murakami@gmail.com, m la pretul de 29.99 RON; 100(Cantitatea curenta)
+
+        //Setters si Getters
+        firstBook.setPrice(8.88);
+        firstBook.setQty(88);
+        System.out.println("Numele este: " + firstBook.getName());
+        System.out.println("Pretul este: " + firstBook.getPrice());
+        System.out.println("Cantitatea este: " + firstBook.getQty());
+        System.out.println("Autorul este: " + firstBook.getAuthor());  // Folosim toString() al clasei Author
+        //author is: Haruki Murakami, haruki.murakami@gmail.com, m
+        System.out.println("Numele autorului este: " + firstBook.getAuthor().getName());
+        //author's name is: Haruki Murakami
+        System.out.println("Emailul autorului este: " + firstBook.getAuthor().getEmail());
+        //author's email is: haruki.murakami@gmail.com
+        System.out.println("Genul autorului este: " + firstBook.getAuthor().getGender());
+        //author's gender is: m
+
+        // Putem folosi un obiect creat direct în constructor
+        Book secondBook = new Book("The prince",
+                new Author("Niccolo Machiavelli", "-", 'm'),
+                10.99, 10);
+        System.out.println(secondBook);  // Folosim metoda de toString() a clasei Book
+        // The prince de Niccolo Machiavelli, -, m la pretul de 10.99 RON; 10(Cantitatea curenta)
+    }
+}
+```
+
+În OOP, organizăm adesea clase în ierarhie pentru a evita dublarea și pentru a <u>reduce redundanța</u>. Clasele din ierarhia inferioară moștenesc toate **variabilele** (atribute statice) și **metodele** (comportamente dinamice) din ierarhiile superioare. O clasă din ierarhia inferioară se numește **subclasă** (sau derivată, copil, clasă extinsă). O clasă din ierarhia superioară se numește **superclasă** (sau clasă de bază, părinte). Prin extragerea tuturor variabilelor și metodelor comune în superclase și lăsând variabilele și metodele specializate în subclase, redundanța poate fi mult redusă sau eliminată, deoarece aceste variabile și metode comune nu trebuie repetate în toate subclasele.
+
+O subclasă moștenește toate variabilele și metodele din superclasele sale, inclusiv părintele imediat, precum și toți strămoșii. Este important de reținut că o subclasă nu este un „subset” al unei superclase. În schimb, subclasa este un „superset” al unei superclase. Se datorează faptului că o subclasă moștenește toate variabilele și metodele superclasei; în plus, extinde superclasa oferind mai multe variabile și metode.
+
+În Java, definiți o subclasă folosind cuvântul cheie ``extends``, de exemplu:
+
+```java
+public class Teacher extends Person { ... }
+public class Student extends Person { ... }
+```
+
+### Exemplu
+
+```mermaid
+classDiagram
+    class Person {
+        Person: String name
+        Person: String birthDate
+        Person: char gender
+        Person: Person()
+        Person: Person(name, birthDate)
+        Person: Person(name, birthDate, gender)
+        Person: getName()
+        Person: getBirthdate()
+        Person: getGender()
+        Person: setGender()
+    }
+    
+    class Teacher{
+    	Teacher: String specialty
+    	Teacher: Teacher()
+    	Teacher: Teacher(name, birthDate)
+    	Teacher: Teacher(name, birthDate, gender)
+    	Teacher: Teacher(name, birthDate, gender, specialty)
+    	Teacher: getSpecialty()
+    	Teacher: setSpecialty()
+    }
+    
+    Person <|--Teacher
+
+```
+
+În acest exemplu, derivăm o subclasă numită ``Teacher`` din superclasa ``Person``. Este important de reținut că reutilizam clasa ``Person``. Reutilizarea este una dintre cele mai importante proprietăți ale POO. (De ce să reinventezi roata?) Clasa ``Teacher`` moștenește toate **variabilele membre** (``name``, ``birthDate`` și ``gender``) și **metodele** (``getName()``, ``getBirthDate()``, etc.) din superclasa ``Person``. Definește în continuare o variabilă numită ``speciality``, două metode publice - ``getSpecialty()``și ``setSpecialty()``și <u>proprii săi constructori</u>, după cum se arată:
+
+```java
+package com.company;
+
+public class Person {
+    // Variabile private
+    private String name;
+    private String birthDate;
+    private char gender;
+
+    // Constructori
+    public Person() {
+        this.name = "";
+        this.birthDate = "";
+        this.gender = '\0';
+    }
+
+    public Person(String name, String birthDate) {
+        this.name = name;
+        this.birthDate = birthDate;
+    }
+
+    public Person(String name, String birthDate, char gender) {
+        this.name = name;
+        this.birthDate = birthDate;
+        this.gender = gender;
+    }
+
+    // Getter si Setter
+    public String getName() {
+        return name;
+    }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public char getGender() {
+        return gender;
+    }
+
+    public void setGender(char gender) {
+        this.gender = gender;
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + name +
+                "\nBirthdate: " + birthDate +
+                "\nGender: " + gender;
+    }
+}
+```
+
+```java
+package com.company;
+
+public class Teacher extends Person {
+    // Variabile private
+    private String specialty;
+
+    // Constructori
+    public Teacher() {
+        super();
+        specialty = "";
+    }
+
+    public Teacher(String name, String birthDate, String specialty) {
+        super(name, birthDate);
+        this.specialty = specialty;
+    }
+
+    public Teacher(String name, String birthDate, char gender, String specialty) {
+        super(name, birthDate, gender);
+        this.specialty = specialty;
+    }
+
+    // Getter si Setter
+    public String getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + super.getName() +
+                "\nBirthdate: " + super.getBirthDate() +
+                "\nGender: " + super.getBirthDate() +
+                "\nSpecialty: " + specialty;
+    }
+}
+
+```
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // Test constructors and toString()
+        Person person = new Person("Andrei Cojoc", "01-05-1984");
+        System.out.println(person);  // toString()
+        Person secondPerson = new Person();  // default constructor
+        System.out.println(secondPerson);
+        // Test Setters and Getters
+        person.setGender('m');  // Test setters
+        System.out.println(person);  // toString()
+        System.out.println("Genul este: " + person.getGender());
+
+
+
+        // Test constructors and toString()
+        Teacher teacher = new Teacher("Patrichi Alina", "25-10-1977", "Computer Science");
+        System.out.println(teacher);  // toString()
+        Teacher secondTeacher = new Teacher();  // default constructor
+        System.out.println(secondTeacher);
+        // Test Setters and Getters
+        teacher.setGender('F');  // in superclass
+        teacher.setSpecialty("Informatics");  // in propria clasa
+        System.out.println(teacher);  // toString()
+        System.out.println("Numele este: " + teacher.getName());  // in superclass
+        System.out.println("Ziua de nastere este: " + teacher.getBirthDate());  // in superclass
+        System.out.println("Specializarea este: " + teacher.getSpecialty());  // in propria clasa
+    }
+}
+```
+
+**Regula generală:** Folosiți compoziția dacă este posibil, înainte de a lua în considerare moștenirea. Folosiți moștenirea numai dacă există o relație ierarhică clară între clase.
